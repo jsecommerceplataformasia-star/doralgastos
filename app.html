@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Doral Gastos 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#08081a;--bg2:#0f0f2d;--card:rgba(255,255,255,.04);
+  --border:rgba(180,100,255,.2);--purple:#a855f7;--pink:#f472b6;
+  --green:#22c55e;--yellow:#facc15;--red:#ef4444;--blue:#38bdf8;
+  --orange:#fb923c;--text:#f1f5f9;--muted:#94a3b8;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle 3s infinite;}
+@keyframes twinkle{0%,100%{opacity:.1;}50%{opacity:.6;}}
+#app{position:relative;z-index:1;}
+
+/* NAV */
+.navbar{
+  background:rgba(8,8,26,.95);border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;align-items:center;gap:0;
+  height:60px;position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.nav-brand{
+  font-size:1.1rem;font-weight:900;
+  background:linear-gradient(135deg,#c084fc,#f472b6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;margin-right:24px;
+}
+.nav-tabs{display:flex;gap:4px;flex:1;overflow-x:auto;}
+.nav-tab{
+  padding:8px 16px;border-radius:8px;border:none;background:transparent;
+  color:var(--muted);font-size:.8rem;font-weight:600;letter-spacing:.05em;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.nav-tab:hover{background:rgba(255,255,255,.06);color:var(--text);}
+.nav-tab.active{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.3);}
+.nav-right{display:flex;align-items:center;gap:12px;margin-left:auto;}
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:20px;padding:6px 14px;font-size:.8rem;
+}
+.user-avatar{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#a855f7);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;
+}
+.btn-logout{padding:7px 14px;border-radius:8px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.1);color:#fca5a5;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-logout:hover{background:rgba(239,68,68,.2);}
+
+/* PAGES */
+.page{display:none;padding:28px 24px;max-width:1400px;margin:0 auto;}
+.page.active{display:block;}
+
+/* SECTION TITLE */
+.section-title{font-size:1.1rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:20px;position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(168,85,247,.05),transparent);pointer-events:none;}
+.stat-label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.stat-value{font-size:1.8rem;font-weight:900;letter-spacing:-1px;line-height:1;}
+.stat-sub{font-size:.75rem;color:var(--muted);margin-top:6px;}
+.stat-green .stat-value{color:var(--green);}
+.stat-purple .stat-value{color:var(--purple);}
+.stat-yellow .stat-value{color:var(--yellow);}
+.stat-red .stat-value{color:var(--red);}
+.stat-blue .stat-value{color:var(--blue);}
+.stat-pink .stat-value{color:var(--pink);}
+
+/* FORM CARD */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:28px;}
+.form-title{font-size:.85rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.form-input,.form-select{
+  padding:11px 14px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(180,100,255,.2);border-radius:9px;
+  color:var(--text);font-size:.9rem;outline:none;transition:all .2s;
+  width:100%;
+}
+.form-input:focus,.form-select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(168,85,247,.12);}
+.form-input::placeholder{color:#4b5563;}
+.form-select option{background:#1a1040;color:var(--text);}
+.btn-submit{
+  padding:13px 32px;background:linear-gradient(135deg,#7c3aed,#a855f7);
+  border:none;border-radius:10px;color:#fff;font-size:.9rem;font-weight:700;
+  letter-spacing:.05em;cursor:pointer;transition:all .2s;margin-top:8px;
+}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(168,85,247,.35);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-secondary{padding:13px 24px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;margin-left:10px;}
+.btn-secondary:hover{background:rgba(255,255,255,.1);}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:9999;
+  padding:14px 20px;border-radius:12px;font-size:.85rem;font-weight:600;
+  animation:slideUp .3s ease;box-shadow:0 8px 30px rgba(0,0,0,.4);
+  display:none;
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.toast.success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+.toast.error{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+thead tr{background:rgba(168,85,247,.08);}
+th{padding:12px 14px;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text);}
+tr:hover td{background:rgba(255,255,255,.02);}
+tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.05em;}
+.badge-green{background:rgba(34,197,94,.12);color:#4ade80;}
+.badge-red{background:rgba(239,68,68,.12);color:#fca5a5;}
+.badge-yellow{background:rgba(250,204,21,.12);color:#fbbf24;}
+.badge-blue{background:rgba(56,189,248,.12);color:#7dd3fc;}
+.badge-purple{background:rgba(168,85,247,.12);color:#c4b5fd;}
+.badge-gray{background:rgba(148,163,184,.1);color:#94a3b8;}
+
+/* FILTERS */
+.filters{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.filter-select{padding:9px 14px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:.82rem;outline:none;}
+.filter-select option{background:#1a1040;}
+.search-input{padding:9px 14px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:.82rem;outline:none;width:220px;}
+.search-input::placeholder{color:#4b5563;}
+.filter-label{font-size:.75rem;color:var(--muted);font-weight:600;}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:28px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.chart-title{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+
+/* RANKING BARS */
+.rank-list{display:flex;flex-direction:column;gap:10px;}
+.rank-item{display:flex;flex-direction:column;gap:5px;}
+.rank-header{display:flex;justify-content:space-between;align-items:center;}
+.rank-name{font-size:.82rem;color:var(--text);font-weight:600;}
+.rank-amount{font-size:.82rem;font-weight:700;}
+.rank-bar-bg{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;}
+.rank-bar{height:100%;border-radius:3px;transition:width .6s ease;}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty-icon{font-size:3rem;margin-bottom:12px;opacity:.5;}
+
+/* MONTH TABS */
+.month-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.month-tab{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.month-tab.active{background:rgba(168,85,247,.15);border-color:var(--purple);color:var(--purple);}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .navbar{padding:0 12px;}
+  .nav-tab{padding:7px 10px;font-size:.72rem;}
+  .page{padding:16px 12px;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+}
+</style>
+</head><body>
+<div class="stars" id="stars"></div>
+<div id="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">💰 Doral Gastos</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">🎯 Dashboard</button>
+    <button class="nav-tab" onclick="showPage('gastos')">📋 Registrar Gasto</button>
+    <button class="nav-tab" onclick="showPage('pauta')">📢 Registrar Pauta</button>
+    <button class="nav-tab" onclick="showPage('historial')">📊 Historial Gastos</button>
+    <button class="nav-tab" onclick="showPage('historial_pauta')">📈 Historial Pauta</button>
+  </div>
+  <div class="nav-right">
+    <div class="user-chip">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <span id="userName">Admin</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">SALIR</button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="section-title">🎯 Dashboard General — 2026</div>
+  <div class="stats-grid">
+    <div class="stat-card stat-purple">
+      <div class="stat-label">Total Gastos Operativos</div>
+      <div class="stat-value" id="d-total-gastos">$0</div>
+      <div class="stat-sub" id="d-total-gastos-sub">0 registros</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-label">Gastos Pagados</div>
+      <div class="stat-value" id="d-pagados">$0</div>
+      <div class="stat-sub">Estado: Pagado</div>
+    </div>
+    <div class="stat-card stat-red">
+      <div class="stat-label">Pendientes por Pagar</div>
+      <div class="stat-value" id="d-pendientes">$0</div>
+      <div class="stat-sub">Estado: Pendiente</div>
+    </div>
+    <div class="stat-card stat-pink">
+      <div class="stat-label">Total Inversión Pauta</div>
+      <div class="stat-value" id="d-total-pauta">$0</div>
+      <div class="stat-sub" id="d-total-pauta-sub">0 transacciones</div>
+    </div>
+    <div class="stat-card stat-yellow">
+      <div class="stat-label">Costo Total Empresa</div>
+      <div class="stat-value" id="d-costo-total">$0</div>
+      <div class="stat-sub">Gastos + Pauta</div>
+    </div>
+    <div class="stat-card stat-blue">
+      <div class="stat-label">Meta Ads</div>
+      <div class="stat-value" id="d-meta">$0</div>
+      <div class="stat-sub" id="d-meta-sub">0 transacciones</div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">📊 Gastos por Categoría</div>
+      <div class="rank-list" id="rank-categorias"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">💳 Gastos por Método de Pago</div>
+      <div class="rank-list" id="rank-metodos"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📢 Pauta por Plataforma</div>
+      <div class="rank-list" id="rank-plataformas"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📅 Gasto Mensual</div>
+      <canvas id="chartMensual" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:8px;">⏱️ Últimos 10 Gastos Registrados</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Categoría</th><th>Producto/Servicio</th><th>Valor</th><th>Método Pago</th><th>Estado</th></tr></thead>
+      <tbody id="tabla-recientes"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- REGISTRAR GASTO -->
+<div class="page" id="page-gastos">
+  <div class="section-title">📋 Registrar Gasto Operativo</div>
+  <div class="form-card">
+    <div class="form-title">✏️ Nuevo Registro de Gasto</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Fecha *</label>
+        <input type="date" id="g-fecha" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor ($COP) *</label>
+        <input type="number" id="g-valor" class="form-input" placeholder="0" min="0"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoría *</label>
+        <select id="g-categoria" class="form-select">
+          <option value="">Selecciona categoría...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de Gasto</label>
+        <select id="g-tipo" class="form-select">
+          <option value="Costo Variable">Costo Variable</option>
+          <option value="Costo Fijo">Costo Fijo</option>
+          <option value="Inversión">Inversión</option>
+          <option value="Impuesto">Impuesto</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Producto / Servicio</label>
+        <select id="g-producto" class="form-select">
+          <option value="">Selecciona producto...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Método de Pago</label>
+        <select id="g-metodo" class="form-select">
+          <option value="">Selecciona método...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="g-estado" class="form-select">
+          <option value="Pagado">✅ Pagado</option>
+          <option value="Pendiente">⏳ Pendiente</option>
+          <option value="Sin Definir">❓ Sin Definir</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Referencia / Código</label>
+        <input type="text" id="g-referencia" class="form-input" placeholder="Ej: FAC-001, comprobante..."/>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Descripción / Concepto</label>
+        <input type="text" id="g-descripcion" class="form-input" placeholder="Describe el gasto..."/>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;align-items:center;gap:0;">
+      <button class="btn-submit" id="btnGuardarGasto" onclick="guardarGasto()">💾 GUARDAR GASTO</button>
+      <button class="btn-secondary" onclick="limpiarGasto()">🔄 LIMPIAR</button>
+    </div>
+  </div>
+
+  <div class="section-title">📋 Registros del Día</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Fecha</th><th>Categoría</th><th>Producto/Servicio</th><th>Tipo</th><th>Valor</th><th>Descripción</th><th>Método Pago</th><th>Estado</th></tr></thead>
+      <tbody id="tabla-hoy-gastos"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- REGISTRAR PAUTA -->
+<div class="page" id="page-pauta">
+  <div class="section-title">📢 Registrar Pauta Publicitaria</div>
+  <div class="form-card">
+    <div class="form-title">✏️ Nuevo Registro de Pauta</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Fecha *</label>
+        <input type="date" id="p-fecha" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Inversión ($COP) *</label>
+        <input type="number" id="p-inversion" class="form-input" placeholder="0" min="0"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plataforma *</label>
+        <select id="p-plataforma" class="form-select">
+          <option value="">Selecciona plataforma...</option>
+          <option value="Meta Ads">📘 Meta Ads</option>
+          <option value="TikTok Ads">🎵 TikTok Ads</option>
+          <option value="Cuota Manejo">💳 Cuota Manejo</option>
+          <option value="Wallet Dropi">🛍️ Wallet Dropi</option>
+          <option value="Otro">📌 Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cuenta Publicitaria</label>
+        <input type="text" id="p-cuenta" class="form-input" placeholder="Ej: CP1 JC, CP4 Metatron..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ID Transacción</label>
+        <input type="text" id="p-transaccion" class="form-input" placeholder="Código de transacción..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Banco / Tarjeta</label>
+        <select id="p-metodo" class="form-select">
+          <option value="">Selecciona banco...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="p-estado" class="form-select">
+          <option value="Pagado">✅ Pagado</option>
+          <option value="Pendiente">⏳ Pendiente</option>
+          <option value="Sin Definir">❓ Sin Definir</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cód. Retiro Dropi</label>
+        <input type="text" id="p-dropi" class="form-input" placeholder="Código retiro Dropi..."/>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Notas</label>
+        <input type="text" id="p-notas" class="form-input" placeholder="Notas adicionales..."/>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <button class="btn-submit" id="btnGuardarPauta" onclick="guardarPauta()">💾 GUARDAR PAUTA</button>
+      <button class="btn-secondary" onclick="limpiarPauta()">🔄 LIMPIAR</button>
+    </div>
+  </div>
+
+  <div class="section-title">📢 Registros del Día — Pauta</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Fecha</th><th>Plataforma</th><th>Cuenta</th><th>Inversión</th><th>ID Transacción</th><th>Banco</th><th>Estado</th></tr></thead>
+      <tbody id="tabla-hoy-pauta"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- HISTORIAL GASTOS -->
+<div class="page" id="page-historial">
+  <div class="section-title">📊 Historial de Gastos Operativos</div>
+  <div class="filters">
+    <span class="filter-label">Filtrar:</span>
+    <select class="filter-select" id="h-mes" onchange="filtrarHistorial()">
+      <option value="">Todos los meses</option>
+      <option value="enero">Enero</option><option value="febrero">Febrero</option>
+      <option value="marzo">Marzo</option><option value="abril">Abril</option>
+      <option value="mayo">Mayo</option><option value="junio">Junio</option>
+      <option value="julio">Julio</option><option value="agosto">Agosto</option>
+      <option value="septiembre">Septiembre</option><option value="octubre">Octubre</option>
+      <option value="noviembre">Noviembre</option><option value="diciembre">Diciembre</option>
+    </select>
+    <select class="filter-select" id="h-categoria" onchange="filtrarHistorial()">
+      <option value="">Todas las categorías</option>
+    </select>
+    <select class="filter-select" id="h-estado" onchange="filtrarHistorial()">
+      <option value="">Todos los estados</option>
+      <option value="Pagado">Pagado</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="Sin Definir">Sin Definir</option>
+    </select>
+    <input type="text" class="search-input" id="h-buscar" placeholder="🔍 Buscar..." oninput="filtrarHistorial()"/>
+  </div>
+  <div style="margin-bottom:14px;display:flex;gap:16px;align-items:center;">
+    <span style="font-size:.82rem;color:var(--muted);" id="h-count">0 registros</span>
+    <span style="font-size:.82rem;font-weight:700;color:var(--purple);" id="h-total">Total: $0</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Fecha</th><th>Mes</th><th>Categoría</th><th>Producto/Servicio</th><th>Tipo</th><th>Valor</th><th>Descripción</th><th>Referencia</th><th>Método Pago</th><th>Estado</th></tr></thead>
+      <tbody id="tabla-historial"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- HISTORIAL PAUTA -->
+<div class="page" id="page-historial_pauta">
+  <div class="section-title">📈 Historial de Pauta Publicitaria</div>
+  <div class="filters">
+    <span class="filter-label">Filtrar:</span>
+    <select class="filter-select" id="hp-mes" onchange="filtrarHistorialPauta()">
+      <option value="">Todos los meses</option>
+      <option value="enero">Enero</option><option value="febrero">Febrero</option>
+      <option value="marzo">Marzo</option><option value="abril">Abril</option>
+      <option value="mayo">Mayo</option><option value="junio">Junio</option>
+      <option value="julio">Julio</option><option value="agosto">Agosto</option>
+      <option value="septiembre">Septiembre</option><option value="octubre">Octubre</option>
+      <option value="noviembre">Noviembre</option><option value="diciembre">Diciembre</option>
+    </select>
+    <select class="filter-select" id="hp-plataforma" onchange="filtrarHistorialPauta()">
+      <option value="">Todas las plataformas</option>
+      <option value="Meta Ads">Meta Ads</option>
+      <option value="TikTok Ads">TikTok Ads</option>
+      <option value="Cuota Manejo">Cuota Manejo</option>
+    </select>
+    <select class="filter-select" id="hp-estado" onchange="filtrarHistorialPauta()">
+      <option value="">Todos los estados</option>
+      <option value="Pagado">Pagado</option>
+      <option value="Pendiente">Pendiente</option>
+    </select>
+    <input type="text" class="search-input" id="hp-buscar" placeholder="🔍 Buscar..." oninput="filtrarHistorialPauta()"/>
+  </div>
+  <div style="margin-bottom:14px;display:flex;gap:16px;">
+    <span style="font-size:.82rem;color:var(--muted);" id="hp-count">0 registros</span>
+    <span style="font-size:.82rem;font-weight:700;color:var(--pink);" id="hp-total">Total: $0</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Fecha</th><th>Mes</th><th>Plataforma</th><th>Cuenta Pub.</th><th>Inversión</th><th>ID Transacción</th><th>Banco</th><th>Estado</th><th>Notas</th></tr></thead>
+      <tbody id="tabla-historial-pauta"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- end app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div><script>
+const SB='https://upeiygxcowihdaqzrukq.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwZWl5Z3hjb3dpaGRhcXpydWtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MTQzNDYsImV4cCI6MjA4OTE5MDM0Nn0.5qimb_jgYZQHQPQ0Fs-gnSAP1vASZ78AumeZn1748LE';
+const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+
+let USER=null,allGastos=[],allPauta=[],categorias=[],metodos=[],productos=[];
+let chartMensual=null;
+
+// AUTH CHECK
+const u=sessionStorage.getItem('dg_user');
+if(!u){window.location.href='index.html';}
+else{USER=JSON.parse(u);initApp();}
+
+function initApp(){
+  document.getElementById('userName').textContent=USER.nombre;
+  document.getElementById('userAvatar').textContent=USER.nombre.charAt(0).toUpperCase();
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('g-fecha').value=today;
+  document.getElementById('p-fecha').value=today;
+  generateStars();
+  loadCatalogos().then(()=>{loadDashboard();loadHoy();});
+}
+
+function generateStars(){
+  const s=document.getElementById('stars');
+  for(let i=0;i<120;i++){const d=document.createElement('div');d.className='star';d.style.left=Math.random()*100+'%';d.style.top=Math.random()*100+'%';d.style.animationDelay=Math.random()*3+'s';d.style.opacity=Math.random()*0.4+0.05;s.appendChild(d);}
+}
+
+async function sbFetch(path){
+  const r=await fetch(SB+'/rest/v1/'+path,{headers:H});
+  return r.json();
+}
+async function sbPost(table,body){
+  const r=await fetch(SB+'/rest/v1/'+table,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+async function loadCatalogos(){
+  categorias=await sbFetch('categorias?activo=eq.true&order=nombre');
+  metodos=await sbFetch('metodos_pago?activo=eq.true&order=nombre');
+  productos=await sbFetch('productos_servicios?activo=eq.true&order=nombre');
+  fillSelect('g-categoria',categorias,'nombre','nombre');
+  fillSelect('g-producto',productos,'nombre','nombre');
+  fillSelect('g-metodo',metodos,'nombre','nombre');
+  fillSelect('p-metodo',metodos,'nombre','nombre');
+  fillSelect('h-categoria',categorias,'nombre','nombre');
+}
+
+function fillSelect(id,arr,val,label,placeholder){
+  const s=document.getElementById(id);
+  if(!s)return;
+  const cur=s.value;
+  while(s.options.length>1)s.remove(1);
+  arr.forEach(i=>{const o=document.createElement('option');o.value=i[val];o.textContent=i[label];s.appendChild(o);});
+  if(cur)s.value=cur;
+}
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  event.target.classList.add('active');
+  if(p==='dashboard')loadDashboard();
+  if(p==='gastos')loadHoy();
+  if(p==='pauta')loadHoyPauta();
+  if(p==='historial')loadHistorial();
+  if(p==='historial_pauta')loadHistorialPauta();
+}
+
+function logout(){sessionStorage.removeItem('dg_user');window.location.href='index.html';}
+
+function fmt(n){return'$'+Math.round(n||0).toLocaleString('es-CO');}
+function getMonth(fecha){const m=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];return m[new Date(fecha+'T00:00:00').getMonth()];}
+
+async function loadDashboard(){
+  allGastos=await sbFetch('gastos?order=fecha.desc');
+  allPauta=await sbFetch('pauta?order=fecha.desc');
+  const totalG=allGastos.reduce((s,r)=>s+(+r.valor||0),0);
+  const pagados=allGastos.filter(r=>r.estado==='Pagado').reduce((s,r)=>s+(+r.valor||0),0);
+  const pendientes=allGastos.filter(r=>r.estado==='Pendiente').reduce((s,r)=>s+(+r.valor||0),0);
+  const totalP=allPauta.reduce((s,r)=>s+(+r.inversion||0),0);
+  const meta=allPauta.filter(r=>r.plataforma==='Meta Ads').reduce((s,r)=>s+(+r.inversion||0),0);
+  document.getElementById('d-total-gastos').textContent=fmt(totalG);
+  document.getElementById('d-total-gastos-sub').textContent=allGastos.length+' registros';
+  document.getElementById('d-pagados').textContent=fmt(pagados);
+  document.getElementById('d-pendientes').textContent=fmt(pendientes);
+  document.getElementById('d-total-pauta').textContent=fmt(totalP);
+  document.getElementById('d-total-pauta-sub').textContent=allPauta.length+' transacciones';
+  document.getElementById('d-costo-total').textContent=fmt(totalG+totalP);
+  document.getElementById('d-meta').textContent=fmt(meta);
+  document.getElementById('d-meta-sub').textContent=allPauta.filter(r=>r.plataforma==='Meta Ads').length+' trans.';
+  buildRankCategorias();buildRankMetodos();buildRankPlataformas();buildChartMensual();
+  buildTablaRecientes();
+}
+
+function buildRank(containerId,items,colorVar){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const max=items[0]?items[0].total:1;
+  const colors=['#a855f7','#f472b6','#22c55e','#facc15','#38bdf8','#fb923c','#e879f9','#34d399'];
+  el.innerHTML=items.slice(0,8).map((i,idx)=>`
+    <div class="rank-item">
+      <div class="rank-header">
+        <span class="rank-name">${i.label}</span>
+        <span class="rank-amount" style="color:${colors[idx%colors.length]}">${fmt(i.total)}</span>
+      </div>
+      <div class="rank-bar-bg"><div class="rank-bar" style="width:${(i.total/max*100).toFixed(1)}%;background:${colors[idx%colors.length]}"></div></div>
+    </div>`).join('');
+  if(!items.length)el.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Sin datos aún</p></div>';
+}
+
+function buildRankCategorias(){
+  const map={};allGastos.forEach(r=>{map[r.categoria]=(map[r.categoria]||0)+(+r.valor||0);});
+  const items=Object.entries(map).map(([k,v])=>({label:k,total:v})).sort((a,b)=>b.total-a.total);
+  buildRank('rank-categorias',items);
+}
+function buildRankMetodos(){
+  const map={};allGastos.filter(r=>r.metodo_pago).forEach(r=>{map[r.metodo_pago]=(map[r.metodo_pago]||0)+(+r.valor||0);});
+  const items=Object.entries(map).map(([k,v])=>({label:k,total:v})).sort((a,b)=>b.total-a.total);
+  buildRank('rank-metodos',items);
+}
+function buildRankPlataformas(){
+  const map={};allPauta.forEach(r=>{map[r.plataforma]=(map[r.plataforma]||0)+(+r.inversion||0);});
+  const items=Object.entries(map).map(([k,v])=>({label:k,total:v})).sort((a,b)=>b.total-a.total);
+  buildRank('rank-plataformas',items);
+}
+
+function buildChartMensual(){
+  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const gMap={},pMap={};
+  allGastos.forEach(r=>{const m=getMonth(r.fecha);gMap[m]=(gMap[m]||0)+(+r.valor||0);});
+  allPauta.forEach(r=>{const m=getMonth(r.fecha);pMap[m]=(pMap[m]||0)+(+r.inversion||0);});
+  const labels=meses.filter(m=>gMap[m]||pMap[m]);
+  const gData=labels.map(m=>gMap[m]||0);
+  const pData=labels.map(m=>pMap[m]||0);
+  const ctx=document.getElementById('chartMensual').getContext('2d');
+  if(chartMensual)chartMensual.destroy();
+  chartMensual=new Chart(ctx,{type:'bar',data:{labels:labels.map(m=>m.charAt(0).toUpperCase()+m.slice(1)),datasets:[{label:'Gastos Op.',data:gData,backgroundColor:'rgba(168,85,247,.7)',borderRadius:6},{label:'Pauta',data:pData,backgroundColor:'rgba(244,114,182,.7)',borderRadius:6}]},options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}},scales:{x:{ticks:{color:'#94a3b8'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#94a3b8',callback:v=>'$'+Math.round(v/1000)+'k'},grid:{color:'rgba(255,255,255,.05)'}}}}});
+}
+
+function buildTablaRecientes(){
+  const tbody=document.getElementById('tabla-recientes');
+  tbody.innerHTML=allGastos.slice(0,10).map(r=>`<tr>
+    <td>${r.fecha}</td><td><span class="badge badge-purple">${r.categoria}</span></td>
+    <td>${r.producto_servicio||'—'}</td><td style="color:#a855f7;font-weight:700">${fmt(r.valor)}</td>
+    <td>${r.metodo_pago||'—'}</td><td>${estadoBadge(r.estado)}</td>
+  </tr>`).join('') || '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📭</div><p>Sin registros</p></div></td></tr>';
+}
+
+function estadoBadge(e){
+  if(e==='Pagado')return '<span class="badge badge-green">✅ Pagado</span>';
+  if(e==='Pendiente')return '<span class="badge badge-red">⏳ Pendiente</span>';
+  return '<span class="badge badge-gray">❓ Sin Definir</span>';
+}
+
+async function loadHoy(){
+  const today=new Date().toISOString().split('T')[0];
+  const data=await sbFetch('gastos?fecha=eq.'+today+'&order=created_at.desc');
+  const tbody=document.getElementById('tabla-hoy-gastos');
+  tbody.innerHTML=data.map((r,i)=>`<tr>
+    <td>${i+1}</td><td>${r.fecha}</td>
+    <td><span class="badge badge-purple">${r.categoria}</span></td>
+    <td>${r.producto_servicio||'—'}</td><td>${r.tipo_gasto||'—'}</td>
+    <td style="color:#a855f7;font-weight:700">${fmt(r.valor)}</td>
+    <td>${r.descripcion||'—'}</td><td>${r.metodo_pago||'—'}</td>
+    <td>${estadoBadge(r.estado)}</td>
+  </tr>`).join('')||'<tr><td colspan="9"><div class="empty"><div class="empty-icon">📭</div><p>Sin registros hoy</p></div></td></tr>';
+}
+
+async function loadHoyPauta(){
+  const today=new Date().toISOString().split('T')[0];
+  const data=await sbFetch('pauta?fecha=eq.'+today+'&order=created_at.desc');
+  const tbody=document.getElementById('tabla-hoy-pauta');
+  tbody.innerHTML=data.map((r,i)=>`<tr>
+    <td>${i+1}</td><td>${r.fecha}</td>
+    <td><span class="badge badge-pink">${r.plataforma}</span></td>
+    <td>${r.cuenta_publicitaria||'—'}</td>
+    <td style="color:#f472b6;font-weight:700">${fmt(r.inversion)}</td>
+    <td style="font-size:.75rem;color:#94a3b8">${r.id_transaccion||'—'}</td>
+    <td>${r.metodo_pago||'—'}</td><td>${estadoBadge(r.estado)}</td>
+  </tr>`).join('')||'<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div><p>Sin registros hoy</p></div></td></tr>';
+}
+
+async function guardarGasto(){
+  const btn=document.getElementById('btnGuardarGasto');
+  const fecha=document.getElementById('g-fecha').value;
+  const valor=document.getElementById('g-valor').value;
+  const categoria=document.getElementById('g-categoria').value;
+  if(!fecha||!valor||!categoria){showToast('Completa Fecha, Valor y Categoría','error');return;}
+  btn.disabled=true;btn.textContent='Guardando...';
+  const body={fecha,valor:parseFloat(valor),categoria,tipo_gasto:document.getElementById('g-tipo').value,producto_servicio:document.getElementById('g-producto').value||null,metodo_pago:document.getElementById('g-metodo').value||null,estado:document.getElementById('g-estado').value,referencia:document.getElementById('g-referencia').value||null,descripcion:document.getElementById('g-descripcion').value||null,responsable:USER.nombre,usuario_id:USER.id};
+  const res=await sbPost('gastos',body);
+  btn.disabled=false;btn.textContent='💾 GUARDAR GASTO';
+  if(res&&res[0]&&res[0].id){showToast('✅ Gasto guardado correctamente','success');limpiarGasto();loadHoy();}
+  else{showToast('Error al guardar. Intenta de nuevo.','error');console.error(res);}
+}
+
+function limpiarGasto(){
+  ['g-valor','g-referencia','g-descripcion'].forEach(id=>document.getElementById(id).value='');
+  ['g-categoria','g-producto','g-metodo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('g-tipo').value='Costo Variable';
+  document.getElementById('g-estado').value='Pagado';
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('g-fecha').value=today;
+}
+
+async function guardarPauta(){
+  const btn=document.getElementById('btnGuardarPauta');
+  const fecha=document.getElementById('p-fecha').value;
+  const inversion=document.getElementById('p-inversion').value;
+  const plataforma=document.getElementById('p-plataforma').value;
+  if(!fecha||!inversion||!plataforma){showToast('Completa Fecha, Inversión y Plataforma','error');return;}
+  btn.disabled=true;btn.textContent='Guardando...';
+  const body={fecha,inversion:parseFloat(inversion),plataforma,cuenta_publicitaria:document.getElementById('p-cuenta').value||null,id_transaccion:document.getElementById('p-transaccion').value||null,metodo_pago:document.getElementById('p-metodo').value||null,estado:document.getElementById('p-estado').value,cod_retiro_dropi:document.getElementById('p-dropi').value||null,notas:document.getElementById('p-notas').value||null,usuario_id:USER.id};
+  const res=await sbPost('pauta',body);
+  btn.disabled=false;btn.textContent='💾 GUARDAR PAUTA';
+  if(res&&res[0]&&res[0].id){showToast('✅ Pauta guardada correctamente','success');limpiarPauta();loadHoyPauta();}
+  else{showToast('Error al guardar. Intenta de nuevo.','error');console.error(res);}
+}
+
+function limpiarPauta(){
+  ['p-inversion','p-cuenta','p-transaccion','p-dropi','p-notas'].forEach(id=>document.getElementById(id).value='');
+  ['p-plataforma','p-metodo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-estado').value='Pagado';
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('p-fecha').value=today;
+}
+
+async function loadHistorial(){
+  allGastos=await sbFetch('gastos?order=fecha.desc');
+  filtrarHistorial();
+}
+function filtrarHistorial(){
+  const mes=document.getElementById('h-mes').value;
+  const cat=document.getElementById('h-categoria').value;
+  const est=document.getElementById('h-estado').value;
+  const bus=(document.getElementById('h-buscar').value||'').toLowerCase();
+  let data=allGastos.filter(r=>{
+    if(mes&&getMonth(r.fecha)!==mes)return false;
+    if(cat&&r.categoria!==cat)return false;
+    if(est&&r.estado!==est)return false;
+    if(bus&&!(r.descripcion||'').toLowerCase().includes(bus)&&!(r.categoria||'').toLowerCase().includes(bus)&&!(r.producto_servicio||'').toLowerCase().includes(bus)&&!(r.referencia||'').toLowerCase().includes(bus))return false;
+    return true;
+  });
+  const total=data.reduce((s,r)=>s+(+r.valor||0),0);
+  document.getElementById('h-count').textContent=data.length+' registros';
+  document.getElementById('h-total').textContent='Total: '+fmt(total);
+  const tbody=document.getElementById('tabla-historial');
+  tbody.innerHTML=data.map((r,i)=>`<tr>
+    <td>${i+1}</td><td>${r.fecha}</td>
+    <td style="text-transform:capitalize">${getMonth(r.fecha)}</td>
+    <td><span class="badge badge-purple">${r.categoria}</span></td>
+    <td>${r.producto_servicio||'—'}</td>
+    <td>${r.tipo_gasto||'—'}</td>
+    <td style="color:#a855f7;font-weight:700">${fmt(r.valor)}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.descripcion||'—'}</td>
+    <td>${r.referencia||'—'}</td>
+    <td>${r.metodo_pago||'—'}</td>
+    <td>${estadoBadge(r.estado)}</td>
+  </tr>`).join('')||'<tr><td colspan="11"><div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados</p></div></td></tr>';
+}
+
+async function loadHistorialPauta(){
+  allPauta=await sbFetch('pauta?order=fecha.desc');
+  filtrarHistorialPauta();
+}
+function filtrarHistorialPauta(){
+  const mes=document.getElementById('hp-mes').value;
+  const plat=document.getElementById('hp-plataforma').value;
+  const est=document.getElementById('hp-estado').value;
+  const bus=(document.getElementById('hp-buscar').value||'').toLowerCase();
+  let data=allPauta.filter(r=>{
+    if(mes&&getMonth(r.fecha)!==mes)return false;
+    if(plat&&r.plataforma!==plat)return false;
+    if(est&&r.estado!==est)return false;
+    if(bus&&!(r.cuenta_publicitaria||'').toLowerCase().includes(bus)&&!(r.id_transaccion||'').toLowerCase().includes(bus)&&!(r.notas||'').toLowerCase().includes(bus))return false;
+    return true;
+  });
+  const total=data.reduce((s,r)=>s+(+r.inversion||0),0);
+  document.getElementById('hp-count').textContent=data.length+' registros';
+  document.getElementById('hp-total').textContent='Total: '+fmt(total);
+  const tbody=document.getElementById('tabla-historial-pauta');
+  tbody.innerHTML=data.map((r,i)=>`<tr>
+    <td>${i+1}</td><td>${r.fecha}</td>
+    <td style="text-transform:capitalize">${getMonth(r.fecha)}</td>
+    <td><span class="badge badge-pink">${r.plataforma}</span></td>
+    <td>${r.cuenta_publicitaria||'—'}</td>
+    <td style="color:#f472b6;font-weight:700">${fmt(r.inversion)}</td>
+    <td style="font-size:.75rem;color:#94a3b8">${r.id_transaccion||'—'}</td>
+    <td>${r.metodo_pago||'—'}</td>
+    <td>${estadoBadge(r.estado)}</td>
+    <td>${r.notas||'—'}</td>
+  </tr>`).join('')||'<tr><td colspan="10"><div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados</p></div></td></tr>';
+}
+
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type;t.style.display='block';
+  setTimeout(()=>{t.style.display='none';},3500);
+}
+</script>
+</body>
+</html>
